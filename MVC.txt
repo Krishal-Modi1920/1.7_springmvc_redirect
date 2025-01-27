@@ -1,0 +1,440 @@
+********************************************************************************************************************************************************************
+**) MVC - Model View Controller
+
+- Used to built the java web application
+- Sub framework of spring framework 
+- It is built on Servlet API
+- It implements all the basic feature of core spring framework like IOC, Dependency Injection.
+
+
+*) Model: Represents the data and business logic of the application. It directly manages the data, logic, and rules of the application.
+*) View: Represents the UI (User Interface). It displays the data from the model to the user and sends user input to the controller.
+*) Controller: Acts as an intermediary between the Model and the View. It listens to user input (from the View) and updates the Model accordingly, or modifies the View.
+
+- Will be using Java Server Tomcat
+
+********************************************************************************************************************************************************************
+**) Working Of Spring MVC
+
+
+
+	 View Template
+		^
+		|
+client -> Front Controller <-> Controller
+
+
+- Initially Client request Front controller ( server ) then will transfer the request to controllers and controllers will handle request then it will return the request 	to frontcontroller(also known as Dispatcher servlet) again with model (data) and name of view (where to show the data).
+- Now the Front controller will take help of view Template (with model thus everything will be delivered to JSP page to view) (means dynamic data will come on our static 	page) then View Template will return it again to Front controller.
+-  then Front controller will again give that back to client.
+ 
+********************************************************************************************************************************************************************
+**) Configuring and Setup Project 
+
+Download Tomcat 9 the most stable version
+- Now in eclipse Window -> Preferences -> Server -> Runtime Environments -> Add -> Apache --> apply
+- Create a new maven project but select web app instead of quick start
+- If Error shown then right click on project name and then build path -> configure build path -> Libraries -> Add server of apache(server)
+- Then window -> show view -> Server Apache will start the server 
+- Add the dependency of springweb mvc
+- Start Server to make it run
+
+
+********************************************************************************************************************************************************************
+**) Spring MVC Application Creation Steps
+
+1) Configure the dispatcher servlet in web.xml
+2) Create Spring Configuration File 
+3) Configure View Resolver
+4) Create Controller
+5) Create a View to show (Page) 
+
+********************************************************************************************************************************************************************
+**) On server
+
+**) Add dependency 
+pom.xml
+
+<dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>3.8.1</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/org.springframework/spring-webmvc -->
+	<dependency>
+	    <groupId>org.springframework</groupId>
+	    <artifactId>spring-webmvc</artifactId>
+	    <version>6.1.12</version>
+	</dependency>
+
+	<dependency>
+	    <groupId>javax.servlet</groupId>
+	    <artifactId>javax.servlet-api</artifactId>
+	    <version>4.0.1</version>
+	    <scope>provided</scope>
+	</dependency>
+  </dependencies>
+
+
+**) src/main/java/ springmvc.controller
+	HomeController.java
+
+package springmvc.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class HomeController {
+
+	@RequestMapping("/")
+    public String defaultPage(Model model) {
+		model.addAttribute("name", "Krishal Modi"); // key, value
+        return "index";
+    }
+    
+    
+    @RequestMapping("/about")
+    public String about() {
+        return "about";
+    }
+}
+
+
+**) WEB-INF/ views
+
+**) about.jsp
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>About</title>
+</head>
+<body>
+	<h1>About is working</h1>
+</body>
+</html>
+
+**) index.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<h1>Hello Krishal</h1>
+
+	<% String name = (String)request.getAttribute("name"); %>
+	
+	<h1>Hello <%= name %></h1>
+</body>
+</html>
+
+
+<!-- // http://localhost:8081/springmvc/about -->
+
+**) WEB-INF
+
+**) spring-servlet.xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd"> 
+
+    <context:component-scan base-package="springmvc.controller"></context:component-scan>
+    
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+</beans>
+
+
+**) web.xml
+
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+  <display-name>Archetype Created Web Application</display-name>
+  
+  	<servlet>
+  		<servlet-name>spring</servlet-name>
+  		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+  	</servlet>
+  
+  	<servlet-mapping>
+  		<servlet-name>spring</servlet-name>
+  		<url-pattern>/</url-pattern>
+  	</servlet-mapping>
+  
+</web-app>
+
+
+********************************************************************************************************************************************************************
+
+**) There are two ways for bringing dynamically data from Controller to JSP page (View)
+
+1) using Model object 
+
+addAttribute(String key, Object value)
+
+where object can be any collection, Student, Integer
+
+2) using ModelAndView
+
+addObject(String key, Object value)
+
+********************************************************************************************************************************************************************
+
+**) From Controller To view
+
+**) index.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="java.util.List" %> <!-- Import List -->
+<%@ page import="java.util.ArrayList" %> 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	
+	
+	<% String name = (String)request.getAttribute("name"); 
+		Integer id = (Integer)request.getAttribute("id");
+		List<String> friends = (List<String>) request.getAttribute("f");
+	%>
+	
+	<h1>Hello <%= name %></h1>
+	<h1>ID <%= id %></h1>
+	
+	<% 
+	for(String s: friends){
+	%>
+		<h3><%= s %></h3>
+	<%
+	} 
+	%>
+	
+</body>
+</html>
+
+
+<!-- // http://localhost:8081/springmvc/about -->
+
+**) about.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>About</title>
+</head>
+<body>
+	<h1>About is working</h1>
+</body>
+</html>
+
+**) help.jsp
+
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ page import="java.time.LocalDateTime" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> <!-- Correct the JSTL taglib declaration -->
+
+<%@page isELIgnored="false" %>		<!-- For using ${EXPRESSION} -->
+
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Help Page</title>
+</head>
+<body>
+	
+	<%-- <% String name = (String)request.getAttribute("name");
+		Integer rollnumber = (Integer)request.getAttribute("rollnumber");
+		LocalDateTime time = (LocalDateTime)request.getAttribute("time");
+	%> --%>
+
+	<h1>Hello my name is ${name } <%-- <%= name %> --%></h1>
+	<h2>This is help Page</h2>
+	<h3>Roll Number is : ${rollnumber } <%-- <%= rollnumber %> --%></h3>
+	<h4>Date and Time is ${time } <%-- <%= time.toString() %> --%></h4>
+	
+	<hr>
+	
+	<c:forEach var="item" items="${marks}">
+        <%-- <h1>${item}</h1> --%> <!-- Display each item from 'marks' -->
+        <c:out value="${item}"></c:out>
+    </c:forEach>
+	
+	
+</body>
+</html>
+
+**) HomeController.java
+
+package springmvc.controller;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
+
+@Controller
+public class HomeController {
+
+	@RequestMapping("/")
+    public String defaultPage(Model model) {
+		model.addAttribute("name", "Krishal Modi"); // key, value
+		model.addAttribute("id", 171);
+		
+		List<String> friends = new ArrayList<String>();
+		friends.add("Krishal");
+		friends.add("Rahul");
+		friends.add("Kalp");
+		friends.add("Devendra");
+		friends.add("Romil");
+		
+		model.addAttribute("f", friends);
+		
+        return "index";
+    }
+    
+    
+    @RequestMapping("/about")
+    public String about() {
+        return "about";
+    }
+    
+    @RequestMapping("/help")
+    public ModelAndView help() {
+    	System.out.println("This is help Controller");
+    	ModelAndView modelAndView = new ModelAndView();
+    	// Setting the Data
+    	modelAndView.addObject("name", "Krishal");
+    	modelAndView.addObject("rollnumber", 171);
+    	LocalDateTime now = LocalDateTime.now();
+    	modelAndView.addObject("time", now);
+    	
+    	// Marks
+    	
+    	List<Integer> list = new ArrayList<Integer>();
+    	list.add(12);
+    	list.add(1325);
+    	list.add(452);
+    	list.add(171);
+    	
+    	modelAndView.addObject("marks", list);
+    	
+    	
+    	// Setting the view name
+    	modelAndView.setViewName("help");
+    	
+    	return modelAndView;
+    }
+}
+
+
+********************************************************************************************************************************************************************
+
+*) View To Controller
+
+********************************************************************************************************************************************************************
+
+**) Redirecting in Spring
+
+3 ways
+1) HttpServletResponse
+2) redirect prefix
+3) RedirectView
+
+
+1) redirect prefix
+
+
+package springmvc.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class ReController {
+	
+	@RequestMapping("/one")
+	public String one()
+	{
+		System.out.println("This is one handler");
+		return "redirect:/enjoy";
+	}	
+	
+	
+	@RequestMapping("/enjoy")
+	public String two() {
+		System.out.println("This is second handler");
+		return "contact";
+	}
+}
+
+
+
+2) RedirectView
+
+
+package springmvc.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.view.RedirectView;
+
+@Controller
+public class ReController {
+	
+	@RequestMapping("/one")
+	public RedirectView one()
+	{
+		System.out.println("This is one handler");
+		RedirectView redirectView = new RedirectView();
+		redirectView.setUrl("enjoy");
+		return redirectView;
+	}	
+	
+	
+	@RequestMapping("/enjoy")
+	public String two() {
+		System.out.println("This is second handler");
+		return "contact";
+	}
+}
+
+
+3) 
